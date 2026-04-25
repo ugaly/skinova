@@ -6,6 +6,7 @@ import {
   Camera,
   ShoppingBag,
   Sun,
+  Clock,
 } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
@@ -93,11 +94,11 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="insights"
+        name="routine"
         options={{
-          title: 'Insights',
+          title: 'Routine',
           tabBarIcon: ({ color, size }) => (
-            <BarChart2 size={size} color={color} />
+            <Clock size={size} color={color} />
           ),
         }}
       />

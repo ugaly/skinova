@@ -5,6 +5,7 @@ import '../global.css';
 import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { ModalProvider } from './context/ModalContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,24 +29,59 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="face-scan"
-        options={{
-          presentation: 'fullScreenModal',
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="auth-modal"
-        options={{
-          presentation: Platform.OS === 'ios' ? 'modal' : 'transparentModal',
-          animation: Platform.OS === 'ios' ? 'slide_from_bottom' : 'fade_from_bottom',
-          contentStyle: { backgroundColor: 'transparent' },
-        }}
-      />
-    </Stack>
+    <ModalProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* <Stack.Screen name="index" /> */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="face-scan"
+          options={{
+            presentation: 'fullScreenModal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="auth-modal"
+          options={{
+            presentation: Platform.OS === 'ios' ? 'modal' : 'transparentModal',
+            animation: Platform.OS === 'ios' ? 'slide_from_bottom' : 'fade_from_bottom',
+            contentStyle: { backgroundColor: 'transparent' },
+          }}
+        />
+        <Stack.Screen
+          name="recommendations"
+          options={{
+            presentation: 'card',
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="modal-detail"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="routine-detail"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="ai-chat"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="my-shelf"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </ModalProvider>
   );
 }
