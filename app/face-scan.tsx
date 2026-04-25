@@ -52,37 +52,6 @@ const productRecommendations = [
   },
 ];
 
-// ── Minimal typewriter for processing screen ────────────────────────────────
-function TypeWriterSimple({ text, style }: { text: string; style?: object | object[] }) {
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-  const idxRef = useRef(0);
-  const tRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    idxRef.current = 0;
-    setDisplayed('');
-    setDone(false);
-    function tick() {
-      if (idxRef.current < text.length) {
-        const ch = text[idxRef.current];
-        idxRef.current += 1;
-        setDisplayed((p) => p + ch);
-        tRef.current = setTimeout(tick, 65);
-      } else {
-        setDone(true);
-      }
-    }
-    tRef.current = setTimeout(tick, 120);
-    return () => { if (tRef.current) clearTimeout(tRef.current); };
-  }, [text]);
-  return (
-    <Text style={style}>
-      {displayed}
-      {!done && <Text style={{ opacity: 0.4 }}>|</Text>}
-    </Text>
-  );
-}
-
 export default function FaceScanScreen() {
   const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
@@ -93,8 +62,8 @@ export default function FaceScanScreen() {
   const [typingText, setTypingText] = useState('Position your face in the oval');
   const [processingText, setProcessingText] = useState('Analyzing your skin structure...');
   const [processingDone, setProcessingDone] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const lottieRef = useRef<LottieView>(null);
 
   const scanLineProgress = useSharedValue(0);
   const pulse = useSharedValue(1);
@@ -158,6 +127,7 @@ export default function FaceScanScreen() {
               setPhase('processing');
               setProcessingText('Analyzing your skin structure...');
               setProcessingDone(false);
+              setProcessingProgress(0);
               await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             }
           } catch (e) {
@@ -176,7 +146,6 @@ export default function FaceScanScreen() {
   // Processing phase — cycle AI messages then show detected
   useEffect(() => {
     if (phase !== 'processing') return;
-    lottieRef.current?.play();
     const messages = [
       'Analyzing your skin structure...',
       'Mapping 120+ facial data points...',
@@ -188,13 +157,17 @@ export default function FaceScanScreen() {
     let idx = 0;
     setProcessingText(messages[0]);
     setProcessingDone(false);
+    setProcessingProgress(8);
     const interval = setInterval(() => {
       idx += 1;
       if (idx < messages.length) {
         setProcessingText(messages[idx]);
+        const pct = Math.round((idx / (messages.length - 1)) * 100);
+        setProcessingProgress(pct);
         void Haptics.selectionAsync();
         if (idx === messages.length - 1) {
           setProcessingDone(true);
+          setProcessingProgress(100);
         }
       }
     }, 1400);
@@ -281,23 +254,30 @@ export default function FaceScanScreen() {
       {/* ── AI Processing Screen ── */}
       {phase === 'processing' && (
         <Animated.View entering={FadeIn.duration(400)} style={styles.processingOverlay}>
-          {/* Lottie bot – floats over the transparent face photo */}
-          <LottieView
-            ref={lottieRef}
-            source={require('@/assets/bot.json')}
-            autoPlay
-            loop
-            style={styles.processingLottie}
-          />
+          <View style={styles.processingScrim} />
 
-          {/* Typewriter message only */}
-          <Animated.View key={processingText} entering={FadeIn.duration(280)} style={styles.processingTextBox}>
-            <TypeWriterSimple
-              key={processingText}
-              text={processingText}
-              style={[styles.processingMsg, processingDone && styles.processingMsgDone]}
-            />
-          </Animated.View>
+          <BlurView intensity={48} tint="dark" style={styles.processingCard}>
+            <View style={styles.loaderLottieWrap}>
+              <LottieView
+                source={require('@/assets/bot.json')}
+                autoPlay
+                loop
+                style={styles.processingLottie}
+              />
+            </View>
+
+            <Animated.View entering={FadeIn.duration(220)} style={styles.processingTextBox}>
+              <Text style={[styles.processingMsg, processingDone && styles.processingMsgDone]}>{processingText}</Text>
+            </Animated.View>
+
+            <View style={styles.processingProgressRow}>
+              <Text style={styles.processingProgressLabel}>AI Progress</Text>
+              <Text style={styles.processingProgressValue}>{processingProgress}%</Text>
+            </View>
+            <View style={styles.processingProgressTrack}>
+              <View style={[styles.processingProgressFill, { width: `${processingProgress}%` }]} />
+            </View>
+          </BlurView>
         </Animated.View>
       )}
 
@@ -375,6 +355,17 @@ export default function FaceScanScreen() {
                 <Text style={styles.heroSubtitle}>
                   Strong barrier overall, mild dehydration around cheeks, and small texture buildup on T-zone.
                 </Text>
+                <View style={styles.concernRow}>
+                  <View style={styles.concernChip}>
+                    <Text style={styles.concernText}>Hydration</Text>
+                  </View>
+                  <View style={styles.concernChip}>
+                    <Text style={styles.concernText}>Texture</Text>
+                  </View>
+                  <View style={styles.concernChip}>
+                    <Text style={styles.concernText}>Pigment</Text>
+                  </View>
+                </View>
 
                 <View style={styles.heroScoreRow}>
                   <View style={styles.heroMainScore}>
@@ -464,6 +455,15 @@ export default function FaceScanScreen() {
             </Animated.View>
 
             <Animated.View entering={FadeIn.delay(260).duration(450)} style={styles.sectionCard}>
+              <BlurView intensity={42} tint="light" style={styles.sectionInner}>
+                <Text style={styles.sectionTitle}>Weekly Insight</Text>
+                <Text style={styles.sectionSubtitle}>
+                  If you follow the routine daily, your hydration score can improve by 8-12% in 14 days.
+                </Text>
+              </BlurView>
+            </Animated.View>
+
+            <Animated.View entering={FadeIn.delay(300).duration(450)} style={styles.sectionCard}>
               <Pressable
                 style={styles.startRoutineButton}
                 onPress={async () => {
@@ -709,6 +709,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
+  concernRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  concernChip: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: 'rgba(167, 243, 208, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(167, 243, 208, 0.45)',
+  },
+  concernText: {
+    fontFamily: AppTypography.medium,
+    fontSize: 11,
+    color: '#D1FAE5',
+  },
   heroScoreRow: {
     marginTop: 16,
     flexDirection: 'row',
@@ -882,10 +900,39 @@ const styles = StyleSheet.create({
     zIndex: 30,
     backgroundColor: 'transparent',
   },
-  processingLottie: { width: 180, height: 180 },
+  processingScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(1, 20, 12, 0.42)',
+  },
+  processingCard: {
+    width: width - 44,
+    borderRadius: 26,
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 18,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(167,243,208,0.35)',
+    backgroundColor: 'rgba(6, 28, 20, 0.52)',
+    alignItems: 'center',
+  },
+  loaderLottieWrap: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 2,
+    borderColor: 'rgba(52, 211, 153, 0.35)',
+    backgroundColor: 'rgba(20, 83, 45, 0.24)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  processingLottie: {
+    width: 112,
+    height: 112,
+  },
   processingTextBox: {
     marginTop: 12,
-    paddingHorizontal: 32,
+    paddingHorizontal: 14,
     alignItems: 'center',
   },
   processingMsg: {
@@ -900,6 +947,36 @@ const styles = StyleSheet.create({
   },
   processingMsgDone: {
     color: '#34D399',
+  },
+  processingProgressRow: {
+    marginTop: 16,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  processingProgressLabel: {
+    fontFamily: AppTypography.medium,
+    color: '#A7F3D0',
+    fontSize: 12,
+  },
+  processingProgressValue: {
+    fontFamily: AppTypography.bold,
+    color: '#ECFDF5',
+    fontSize: 12,
+  },
+  processingProgressTrack: {
+    marginTop: 8,
+    width: '100%',
+    height: 8,
+    borderRadius: 6,
+    backgroundColor: 'rgba(236, 253, 245, 0.18)',
+    overflow: 'hidden',
+  },
+  processingProgressFill: {
+    height: '100%',
+    borderRadius: 6,
+    backgroundColor: '#34D399',
   },
 });
 
