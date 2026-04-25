@@ -10,20 +10,14 @@ import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 
 import { AppTypography } from '@/constants/design';
+import { useJourneyStore } from './store/useJourneyStore';
 
 const CATEGORIES = ['All', 'Creams', 'Serums', 'Cleansers', 'Sunscreen'];
-
-const SHELF_DATA = [
-  { id: 1, name: 'The Water Cream', brand: 'TATCHA', image: 'https://i.pinimg.com/736x/54/b9/78/54b978a3378725a86974d85b2361915f.jpg', category: 'Creams', usage: 15, color: '#E0F3FF' },
-  { id: 2, name: 'Lait-Crè Concentrate', brand: 'EMBRYOLISSE', image: 'https://i.pinimg.com/736x/6b/61/2c/6b612cbb2fa0770e6bde590f78e64e1a.jpg', category: 'Creams', usage: 64, color: '#FFF9E6' },
-  { id: 3, name: 'Pure4 Radiance Serum', brand: 'JOYCE GIRAUD', image: 'https://www.joycegiraud.com/cdn/shop/files/Pure4.png?v=1729636331', category: 'Serums', usage: 82, color: '#F0FDF4' },
-  { id: 4, name: 'Alpha Butter', brand: 'Fenty Skin', image: 'https://i.pinimg.com/1200x/ab/e5/64/abe564b4b5c147594bd5aab157fe5bc0.jpg', category: 'Creams', usage: 5, color: '#FDF2F8' },
-  { id: 5, name: 'Niacinamide 10%', brand: 'THE ORDINARY', image: 'https://www.joycegiraud.com/cdn/shop/files/PET_SHAMPOO_CLOSED_FRONT_copy_150x.png?v=1728410142', category: 'Serums', usage: 45, color: '#F3F4F6' },
-];
 
 export default function MyShelfScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { items: SHELF_DATA } = useJourneyStore();
   const [activeCat, setActiveCat] = useState('All');
 
   const filteredItems = activeCat === 'All'

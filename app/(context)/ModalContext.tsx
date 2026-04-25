@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { View, StyleSheet, Modal, Animated, Dimensions, Pressable } from 'react-native';
 
 type ModalType = 'welcome' | 'recommendation' | 'alert' | 'video' | 'gif' | 'gallery' | 'sales';
@@ -86,7 +86,8 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [visible, setVisible] = useState(false);
   const [modalType, setModalType] = useState<ModalType | null>(null);
   const [modalData, setModalData] = useState<ModalData | undefined>(undefined);
-  const [seqIndex, setSeqIndex] = useState(0);
+  const seqIndexRef = useRef(0);
+  const visibleRef = useRef(false);
 
   const showModal = useCallback((type: ModalType, data?: ModalData) => {
     setModalType(type);
@@ -102,16 +103,22 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, 300);
   }, []);
 
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
+
   // Automated circulation logic (every minute)
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const nextModal = MODAL_SEQUENCE[seqIndex];
-  //     showModal(nextModal.type, nextModal.data);
-  //     setSeqIndex((prev) => (prev + 1) % MODAL_SEQUENCE.length);
-  //   }, 60000); // 1 minute
-  //
-  //   return () => clearInterval(interval);
-  // }, [seqIndex, showModal]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (visibleRef.current) return;
+
+      const nextModal = MODAL_SEQUENCE[seqIndexRef.current];
+      showModal(nextModal.type, nextModal.data);
+      seqIndexRef.current = (seqIndexRef.current + 1) % MODAL_SEQUENCE.length;
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [showModal]);
 
   return (
     <ModalContext.Provider value={{ showModal, hideModal }}>
