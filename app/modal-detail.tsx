@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, Share2, Heart, CheckCircle2, Info, Sparkles, Leaf, ShieldCheck, Tag, Zap, Play, Star, Clock } from 'lucide-react-native';
+import { ChevronLeft, Share2, Heart, CheckCircle2, Info, Sparkles, Leaf, ShieldCheck, Tag, Zap, Play, Star, Clock, MapPin, Truck } from 'lucide-react-native';
 import { Animated, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RFValue } from "react-native-responsive-fontsize";
@@ -174,6 +174,20 @@ export default function ModalDetailScreen() {
                             </View>
                         ))}
                     </View>
+
+                    <TouchableOpacity style={styles.supplierCard} activeOpacity={0.9} onPress={() => router.push({
+                        pathname: '/supplier-map',
+                        params: { title: title as string || 'Product Suppliers' }
+                    })}>
+                        <View style={styles.supplierIconWrap}>
+                            <Truck size={18} color="#059669" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.supplierTitle}>Recommended Suppliers Nearby</Text>
+                            <Text style={styles.supplierSub}>View trusted suppliers, ratings, and delivery options.</Text>
+                        </View>
+                        <MapPin size={18} color="#059669" />
+                    </TouchableOpacity>
 
                     <TouchableOpacity style={styles.mainBtn} activeOpacity={0.8}>
                         <View style={styles.btnContent}>
@@ -413,6 +427,39 @@ const styles = StyleSheet.create({
         fontFamily: AppTypography.semibold,
         fontSize: RFValue(12),
         color: '#374151',
+    },
+    supplierCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        backgroundColor: '#F0FDF4',
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: '#BBF7D0',
+        padding: 14,
+        marginBottom: 16,
+    },
+    supplierIconWrap: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#D1FAE5',
+    },
+    supplierTitle: {
+        fontFamily: AppTypography.bold,
+        fontSize: RFValue(13),
+        color: '#14532D',
+        marginBottom: 3,
+    },
+    supplierSub: {
+        fontFamily: AppTypography.medium,
+        fontSize: RFValue(11.5),
+        color: '#4B5563',
+        lineHeight: 17,
     },
     mainBtn: {
         backgroundColor: '#059669',

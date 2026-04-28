@@ -12,7 +12,7 @@ export const VideoModal = ({ data, onClose }: { data: any; onClose: () => void }
   const handlePress = () => {
     onClose();
     router.push({
-      pathname: '/modal-detail',
+      pathname: '/modal-detail2',
       params: { 
         title: data?.title, 
         message: data?.message, 

@@ -32,7 +32,7 @@
 // // ── Design tokens ─────────────────────────────────────────────────────────────
 // const C = {
 //   // Backgrounds
-//   bg: '#F2FBF7',
+//   bg: '#F7FCFA',
 //   bgCard: '#FFFFFF',
 //   bgSection: '#FAFFFE',
 
@@ -51,8 +51,8 @@
 //   textOnGreen: '#FFFFFF',
 
 //   // Borders
-//   border: 'rgba(5,150,105,0.1)',
-//   borderMid: 'rgba(5,150,105,0.18)',
+//   border: 'rgba(15,23,42,0.08)',
+//   borderMid: 'rgba(15,23,42,0.14)',
 
 //   // Misc
 //   wishRed: '#F87171',
@@ -327,7 +327,7 @@
 //       <View style={styles.decorCircle} />
 
 //       {/* ── Fixed header ── */}
-//       <View style={{ paddingTop: insets.top }}>
+//       <View style={[styles.fixedTop, { paddingTop: insets.top }]}>
 
 //         {/* Collapsible hero row */}
 //         <Animated.View style={{ height: headerHeight, opacity: headerOpacity, overflow: 'hidden' }}>
@@ -445,13 +445,23 @@
 
 // const styles = StyleSheet.create({
 //   screen: { flex: 1, backgroundColor: C.bg },
+//   fixedTop: {
+//     backgroundColor: 'rgba(255,255,255,0.94)',
+//     borderBottomWidth: 1,
+//     borderBottomColor: 'rgba(15,23,42,0.06)',
+//     shadowColor: '#0F172A',
+//     shadowOffset: { width: 0, height: 8 },
+//     shadowOpacity: 0.06,
+//     shadowRadius: 14,
+//     elevation: 3,
+//   },
 
 //   // Decorative circle
 //   decorCircle: {
 //     position: 'absolute',
 //     width: 320, height: 320, borderRadius: 160,
 //     backgroundColor: C.primaryLight,
-//     opacity: 0.055,
+//     opacity: 0.03,
 //     top: -120, right: -80,
 //   },
 
@@ -512,14 +522,14 @@
 //     borderRadius: 16,
 //     paddingHorizontal: 14,
 //     paddingVertical: 11,
-//     borderWidth: 1.5,
+//     borderWidth: 1,
 //     borderColor: C.borderMid,
 //     backgroundColor: C.bgCard,
 //     shadowColor: C.shadow,
 //     shadowOffset: { width: 0, height: 3 },
-//     shadowOpacity: 0.07,
-//     shadowRadius: 10,
-//     elevation: 2,
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 1,
 //   },
 //   searchInput: {
 //     flex: 1,
@@ -570,7 +580,7 @@
 //     paddingVertical: 8,
 //     borderRadius: 22,
 //     backgroundColor: C.bgCard,
-//     borderWidth: 1.5,
+//     borderWidth: 1,
 //     borderColor: C.border,
 //     overflow: 'hidden',
 //     shadowColor: C.textDark,
@@ -582,8 +592,8 @@
 //   tabChipActive: {
 //     borderColor: 'transparent',
 //     shadowColor: C.primary,
-//     shadowOpacity: 0.22,
-//     shadowRadius: 8,
+//     shadowOpacity: 0.2,
+//     shadowRadius: 10,
 //     elevation: 4,
 //   },
 //   tabChipText: {
@@ -597,13 +607,21 @@
 //   },
 
 //   // ── Scroll ────────────────────────────────────────────────────────────────
-//   scrollContent: { paddingTop: 4 },
+//   scrollContent: { paddingTop: 8 },
 
 //   // ── Category section ──────────────────────────────────────────────────────
 //   categorySection: {
 //     backgroundColor: C.bgCard,
-//     marginBottom: 6,
+//     marginBottom: 10,
 //     paddingTop: 16,
+//     borderTopWidth: 1,
+//     borderBottomWidth: 1,
+//     borderColor: 'rgba(15,23,42,0.06)',
+//     shadowColor: '#0F172A',
+//     shadowOffset: { width: 0, height: 6 },
+//     shadowOpacity: 0.04,
+//     shadowRadius: 10,
+//     elevation: 2,
 //   },
 //   sectionHeader: {
 //     flexDirection: 'row',
@@ -620,7 +638,7 @@
 //   },
 //   sectionTitle: {
 //     fontFamily: AppTypography.bold,
-//     fontSize: 15.5,
+//     fontSize: 16,
 //     color: C.textDark,
 //     letterSpacing: -0.2,
 //     marginBottom: 3,
@@ -629,7 +647,7 @@
 //   sectionDesc: {
 //     fontFamily: AppTypography.regular,
 //     fontSize: 12.5,
-//     color: C.textSub,
+//     color: '#5F7169',
 //     lineHeight: 18,
 //   },
 //   countBadge: {
@@ -663,12 +681,12 @@
 //     backgroundColor: C.bgCard,
 //     overflow: 'hidden',
 //     shadowColor: C.shadow,
-//     shadowOffset: { width: 0, height: 5 },
-//     shadowOpacity: 0.08,
-//     shadowRadius: 14,
+//     shadowOffset: { width: 0, height: 8 },
+//     shadowOpacity: 0.09,
+//     shadowRadius: 16,
 //     elevation: 3,
-//     borderWidth: 1.5,
-//     borderColor: C.border,
+//     borderWidth: 1,
+//     borderColor: 'rgba(15,23,42,0.1)',
 //   },
 
 //   // Image
@@ -677,6 +695,8 @@
 //     alignItems: 'center',
 //     justifyContent: 'center',
 //     position: 'relative',
+//     borderBottomWidth: 1,
+//     borderBottomColor: 'rgba(15,23,42,0.06)',
 //   },
 //   img: { width: 115, height: 140 },
 
@@ -739,9 +759,11 @@
 //     letterSpacing: 0.7,
 //   },
 //   typeChip: {
-//     backgroundColor: C.primaryDim,
+//     backgroundColor: '#ECFDF5',
 //     borderRadius: 8,
 //     paddingHorizontal: 6, paddingVertical: 2,
+//     borderWidth: 1,
+//     borderColor: 'rgba(5,150,105,0.15)',
 //   },
 //   typeChipText: {
 //     fontFamily: AppTypography.medium,
@@ -776,6 +798,10 @@
 //     alignItems: 'center',
 //     paddingVertical: 64,
 //     gap: 10,
+//     backgroundColor: '#FFFFFF',
+//     borderTopWidth: 1,
+//     borderBottomWidth: 1,
+//     borderColor: 'rgba(15,23,42,0.06)',
 //   },
 //   emptyIcon: {
 //     width: 56, height: 56, borderRadius: 28,
@@ -1189,10 +1215,11 @@
 
 
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { Search, Heart, ArrowRight, Scan, Sparkles, ChevronLeft, ShoppingBag, MoreHorizontal } from 'lucide-react-native';
+import { Video, ResizeMode } from 'expo-av';
+import { Heart, ArrowRight, Scan, ChevronLeft, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
@@ -1204,36 +1231,120 @@ const CATEGORIES = ['All', 'Skincare', 'Makeup', 'Serum', 'Cleanser'];
 
 const ADS = [
   {
-    id: 1,
-    eyebrow: 'FIND THE RIGHT',
-    title: 'Cream for Your Skin',
-    image: 'https://www.joycegiraud.com/cdn/shop/files/3-month-product-image_720_500x.png?v=1725447192',
-    colors: ['#D1FAE5', '#A7F3D0'],
-    type: 'side-image'
+    id: 9,
+    eyebrow: '',
+    title: '',
+    image: 'https://i.pinimg.com/1200x/c1/0c/dc/c10cdc5f757a22a90d8f36a30b47474a.jpg',
+    colors: ['#FFFFFF', '#FFFFFF'],
+    type: 'image-only'
+  },
+  // {
+  //   id: 1,
+  //   eyebrow: 'FIND THE RIGHT',
+  //   title: 'Cream for Your Skin',
+  //   image: 'https://www.joycegiraud.com/cdn/shop/files/3-month-product-image_720_500x.png?v=1725447192',
+  //   colors: ['#D1FAE5', '#A7F3D0'],
+  //   type: 'side-image'
+  // },
+  
+  // {
+  //   id: 3,
+  //   eyebrow: 'PRO CARE EDIT',
+  //   title: 'Botanical Repair Mask in 2 Minutes',
+  //   image: 'https://www.joycegiraud.com/cdn/shop/files/2_min_hair_mask_big_600x.png?v=1737736819',
+  //   colors: ['#EAFBF6', '#99E5D1'],
+  //   type: 'image-left'
+  // },
+  {
+    id: 4,
+    eyebrow: '',
+    title: '',
+    image: 'https://i.pinimg.com/1200x/2f/4d/bc/2f4dbc5525d9019b5679e774ab6cc7ca.jpg',
+    colors: ['#FFFFFF', '#FFFFFF'],
+    type: 'image-only'
   },
   {
-    id: 2,
-    eyebrow: 'EXCLUSIVE OFFER',
-    title: 'Get 20% Off on Beauty Serums',
-    image: 'https://www.joycegiraud.com/cdn/shop/files/Pure4.png?v=1729636331',
-    colors: ['#FDF7E2', '#FEF3C7'],
-    type: 'centered'
+    id: 5,
+    eyebrow: '',
+    title: '',
+    image: 'https://i.pinimg.com/1200x/8e/7e/0d/8e7e0d061a419483105ae3c2d227b0d0.jpg',
+    colors: ['#FFFFFF', '#FFFFFF'],
+    type: 'image-only'
   },
   {
-    id: 3,
-    eyebrow: 'NEW ARRIVAL',
-    title: 'Botanical 2-Minute Mask',
-    image: 'https://www.joycegiraud.com/cdn/shop/files/2_min_hair_mask_big_600x.png?v=1737736819',
-    colors: ['#E0F2F1', '#B2DFDB'],
-    type: 'image-left'
-  }
+    id: 6,
+    eyebrow: '',
+    title: '',
+    image: 'https://i.pinimg.com/1200x/8b/c7/70/8bc770c177d2ca9acb264d5b0ce3353a.jpg',
+    colors: ['#FFFFFF', '#FFFFFF'],
+    type: 'image-only'
+  },
+  // {
+  //   id: 2,
+  //   eyebrow: 'LIMITED TIME GLOW DEAL',
+  //   title: 'Save 20% on Premium Beauty Serums',
+  //   image: 'https://www.joycegiraud.com/cdn/shop/files/Pure4.png?v=1729636331',
+  //   colors: ['#FFF8E8', '#FDE68A'],
+  //   type: 'centered'
+  // },
+  {
+    id: 7,
+    eyebrow: '',
+    title: '',
+    image: 'https://i.pinimg.com/1200x/6e/d1/8a/6ed18af94c41110e135dd1bd0205769d.jpg',
+    colors: ['#FFFFFF', '#FFFFFF'],
+    type: 'image-only'
+  },
+  {
+    id: 8,
+    eyebrow: '',
+    title: '',
+    image: 'https://i.pinimg.com/1200x/cf/43/d7/cf43d7458b9608fafe2967da8435d97e.jpg',
+    colors: ['#FFFFFF', '#FFFFFF'],
+    type: 'image-only'
+  },
 ];
+
+
+
+
 
 const PRODUCTS = [
   { id: 1, name: 'Tatcha Water Cream', price: '$68', image: 'https://www.joycegiraud.com/cdn/shop/files/PET_SHAMPOO_CLOSED_FRONT_copy_150x.png?v=1728410142', color: '#FFF3F6', liked: true, fit: 92 },
   { id: 2, name: 'La Mer Soft Cream', price: '$190', image: 'https://www.joycegiraud.com/cdn/shop/files/Pure4.png?v=1729636331', color: '#EAF6FF', liked: false, fit: 85 },
+  {
+    id: 6,
+    name: 'Hydra Boost Video',
+    price: '$49',
+    image: 'https://www.joycegiraud.com/cdn/shop/files/Ultimate_beauty_sleep_60_days_500x.png?v=1746571919',
+    color: '#E0F2F1',
+    liked: true,
+    fit: 83,
+    videoUrl: 'https://v1.pinimg.com/videos/iht/hls/e3/c9/6f/e3c96fac3810f116a513258a82653e72_540w.cmfv',
+  },
   { id: 3, name: 'Radiance Serum', price: '$45', image: 'https://www.joycegiraud.com/cdn/shop/files/Ultimate_beauty_sleep_60_days_500x.png?v=1746571919', color: '#FDF7E2', liked: false, fit: 78 },
   { id: 4, name: 'Hydra Mist', price: '$32', image: 'https://www.joycegiraud.com/cdn/shop/t/42/assets/NOURISHINGCONDITIONER.png?v=108449484283680266711728966512', color: '#F3F4F6', liked: true, fit: 64 },
+  {
+    id: 5,
+    name: 'Glow Essence Video',
+    price: '$59',
+    image: 'https://www.joycegiraud.com/cdn/shop/files/Pure4.png?v=1729636331',
+    color: '#EEF2FF',
+    liked: false,
+    fit: 88,
+    videoUrl: 'https://v1.pinimg.com/videos/iht/hls/50/e8/d1/50e8d1a0803472bfb3db1bdc02ed3c19_720w.cmfv',
+  },
+  {
+    id: 7,
+    name: 'Radiant Care Video',
+    price: '$54',
+    image: 'https://www.joycegiraud.com/cdn/shop/files/2_min_hair_mask_big_600x.png?v=1737736819',
+    color: '#F3F4F6',
+    liked: false,
+    fit: 90,
+    videoUrl: 'https://v1.pinimg.com/videos/iht/hls/1e/cc/30/1ecc302633124b5a8cd83d253e54ef8d_540w.cmfv',
+  },
+  
 ];
 
 export default function ProductsTab() {
@@ -1271,6 +1382,11 @@ export default function ProductsTab() {
         {/* Dynamic Promo Banner */}
         <View style={styles.bannerContainer}>
           <LinearGradient colors={currentAd.colors as any} style={styles.banner}>
+            {currentAd.type === 'image-only' && (
+              <Image source={{ uri: currentAd.image }} style={styles.imageOnlyBannerImage} contentFit="cover" />
+            )}
+            <View style={styles.bannerGlow} />
+            <View style={styles.bannerGlowSmall} />
             {currentAd.type === 'side-image' && (
               <>
                 <View style={styles.bannerText}>
@@ -1288,9 +1404,6 @@ export default function ProductsTab() {
                 />
                 <Text style={styles.bannerEyebrow}>{currentAd.eyebrow}</Text>
                 <Text style={[styles.bannerTitle, { textAlign: 'center', width: '90%' }]}>{currentAd.title}</Text>
-                <View style={styles.shopNowBadge}>
-                  <Text style={styles.shopNowText}>Shop Now</Text>
-                </View>
               </View>
             )}
             {currentAd.type === 'image-left' && (
@@ -1300,6 +1413,20 @@ export default function ProductsTab() {
                   <Text style={styles.bannerEyebrow}>{currentAd.eyebrow}</Text>
                   <Text style={[styles.bannerTitle, { width: '100%' }]}>{currentAd.title}</Text>
                 </View>
+              </View>
+            )}
+            {currentAd.type !== 'image-only' && (
+              <View style={styles.bannerFooter}>
+                <View style={styles.matchBadge}>
+                  <Text style={styles.matchBadgeText}>
+                    {currentAd.type === 'centered' ? 'Glow Picks of the Week' : '94% Skin Match'}
+                  </Text>
+                </View>
+                <TouchableOpacity style={styles.shopNowBadge} activeOpacity={0.9}>
+                  <Text style={styles.shopNowText}>
+                    {currentAd.type === 'centered' ? 'Claim Offer' : 'Shop Now'}
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </LinearGradient>
@@ -1349,7 +1476,7 @@ export default function ProductsTab() {
               style={styles.productCell}
               activeOpacity={0.9}
               onPress={() => router.push({
-                pathname: '/modal-detail',
+                pathname: p.id % 2 === 0 ? '/modal-detail2' : '/modal-detail',
                 params: {
                   title: p.name,
                   image: p.image,
@@ -1359,7 +1486,18 @@ export default function ProductsTab() {
               })}
             >
               <View style={[styles.productImageContainer, { backgroundColor: p.color }]}>
-                <Image source={{ uri: p.image }} style={styles.productImg} />
+                {p.videoUrl ? (
+                  <Video
+                    source={{ uri: p.videoUrl }}
+                    style={styles.productVideo}
+                    resizeMode={ResizeMode.COVER}
+                    shouldPlay
+                    isLooping
+                    isMuted
+                  />
+                ) : (
+                  <Image source={{ uri: p.image }} style={styles.productImg} />
+                )}
                 <View style={styles.fitPill}>
                   <Text style={styles.fitPillText}>{p.fit}% fit</Text>
                 </View>
@@ -1379,7 +1517,7 @@ export default function ProductsTab() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F0F9F4' },
+  screen: { flex: 1, backgroundColor: '#F8FCFA' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1393,9 +1531,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   headerTitle: {
     fontFamily: AppTypography.bold,
@@ -1411,12 +1551,12 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: '#E2E8F0',
     marginBottom: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     elevation: 3,
   },
   paginationRow: {
@@ -1440,16 +1580,46 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   banner: {
-    height: 140,
+    height: 172,
     borderRadius: 28,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 24,
+    paddingTop: 18,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.65)',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+  bannerGlow: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+    top: -130,
+    right: -70,
+  },
+  bannerGlowSmall: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    bottom: -60,
+    left: -30,
+  },
+  imageOnlyBannerImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   bannerText: {
     flex: 1,
     zIndex: 2,
+    paddingRight: 6,
   },
   bannerEyebrow: {
     fontFamily: AppTypography.bold,
@@ -1460,7 +1630,7 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontFamily: AppTypography.bold,
-    fontSize: RFValue(22),
+    fontSize: RFValue(20),
     color: '#0A2218',
     marginTop: 4,
     width: '70%',
@@ -1468,17 +1638,39 @@ const styles = StyleSheet.create({
   bannerImg: {
     position: 'absolute',
     right: -20,
-    bottom: -10,
-    width: 140,
-    height: 140,
+    bottom: 6,
+    width: 130,
+    height: 130,
     transform: [{ rotate: '-10deg' }],
+  },
+  bannerFooter: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 3,
+  },
+  matchBadge: {
+    backgroundColor: 'rgba(255,255,255,0.88)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: 'rgba(15,23,42,0.06)',
+  },
+  matchBadgeText: {
+    fontFamily: AppTypography.bold,
+    fontSize: RFValue(10),
+    color: '#065F46',
   },
   shopNowBadge: {
     backgroundColor: '#0A2218',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 10,
+    borderRadius: 12,
   },
   shopNowText: {
     color: '#FFF',
@@ -1508,7 +1700,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: '#E2E8F0',
   },
   activeCatChip: {
     backgroundColor: '#34D399',
@@ -1539,10 +1731,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   productImg: {
     width: '80%',
     height: '80%',
+  },
+  productVideo: {
+    width: '100%',
+    height: '100%',
   },
   heartBtn: {
     position: 'absolute',
@@ -1557,6 +1755,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 5,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   pName: {
     fontFamily: AppTypography.bold,

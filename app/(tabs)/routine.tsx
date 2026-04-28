@@ -77,8 +77,8 @@ export default function RoutineTab() {
             <ChevronLeft size={22} color="#0A2218" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Daily Routine</Text>
-        <TouchableOpacity style={styles.iconBtn}>
-            <Calendar size={20} color="#0A2218" />
+        <TouchableOpacity style={styles.iconBtn} onPress={() => router.push('/routine-calendar' as any)}>
+            <Calendar size={24} color="#22C55E" />
         </TouchableOpacity>
       </View>
 

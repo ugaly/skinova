@@ -15,24 +15,16 @@ export function PermissionsProvider({ children }: { children: React.ReactNode })
   const requestCamera = async () => {
     const result = await requestPermission();
     if (!result.granted) {
-      Alert.alert(
-        'Permission Required',
-        'We need camera access to analyze your skin.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Settings', onPress: () => Linking.openSettings() }
-        ]
-      );
+      Alert.alert('Permission Required', 'We need camera access to analyze your skin.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Settings', onPress: () => Linking.openSettings() },
+      ]);
       return false;
     }
     return true;
   };
 
-  return (
-    <PermissionsContext.Provider value={{ cameraPermission: permission, requestCamera }}>
-      {children}
-    </PermissionsContext.Provider>
-  );
+  return <PermissionsContext.Provider value={{ cameraPermission: permission, requestCamera }}>{children}</PermissionsContext.Provider>;
 }
 
 export function usePermissions() {

@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 
 import { AppTypography } from '@/constants/design';
-import { useJourneyStore } from './store/useJourneyStore';
+import { useJourneyStore } from '../store/useJourneyStore';
 
 const CATEGORIES = ['All', 'Creams', 'Serums', 'Cleansers', 'Sunscreen'];
 

@@ -9,6 +9,7 @@ type SocialAuthButtonProps = {
   provider: Provider;
   label: string;
   onPress: () => void;
+  compact?: boolean;
 };
 
 function ProviderIcon({ provider }: { provider: Provider }) {
@@ -53,9 +54,9 @@ function ProviderIcon({ provider }: { provider: Provider }) {
   );
 }
 
-export default function SocialAuthButton({ provider, label, onPress }: SocialAuthButtonProps) {
+export default function SocialAuthButton({ provider, label, onPress, compact = false }: SocialAuthButtonProps) {
   return (
-    <Pressable onPress={onPress} style={styles.button}>
+    <Pressable onPress={onPress} style={[styles.button, compact && styles.buttonCompact]}>
       <View style={styles.iconWrap}>
         <ProviderIcon provider={provider} />
       </View>
@@ -76,6 +77,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  buttonCompact: {
+    minHeight: 48,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    gap: 8,
+  },
   iconWrap: {
     width: 28,
     height: 28,
@@ -90,6 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
     fontWeight: '600',
+    flexShrink: 1,
   },
   emailDotWrap: {
     width: 18,

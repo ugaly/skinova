@@ -5,8 +5,9 @@ import { useRouter } from 'expo-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   StyleSheet, Text, View, Pressable, Platform,
-  Dimensions, ScrollView, StatusBar,
+  Dimensions, ScrollView, StatusBar, TextInput, KeyboardAvoidingView,
 } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, withSpring,
   withSequence, FadeIn, FadeInUp, Easing,
@@ -31,8 +32,14 @@ const STEP_IMAGES: Record<string, string> = {
   outro: 'https://i.pinimg.com/736x/49/b3/ae/49b3aeb525f0fbc356afb861b42b450e.jpg',
 };
 
+const STEP_VIDEOS: Record<string, string> = {
+  videoIntro: 'https://v1.pinimg.com/videos/iht/hls/e3/c9/6f/e3c96fac3810f116a513258a82653e72_540w.cmfv',
+  videoBoost: 'https://v1.pinimg.com/videos/mc/hls/17/cd/13/17cd136f8625ad58f253608d485fddab_480w.cmfv',
+};
+
 // Steps that use a full-bleed photo background
 const IMAGE_STEPS = ['intro', 'gender', 'outro']; // age uses NO-IMAGE layout with bg override
+const VIDEO_STEPS = ['videoIntro', 'videoBoost'];
 
 // ─── Haptic helper ────────────────────────────────────────────────────────────
 function haptic(style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light) {
@@ -160,9 +167,26 @@ function CtaButton({ label, onPress }: { label: string; onPress: () => void }) {
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
-type StepId = 'intro' | 'gender' | 'age' | 'skinType' | 'outro';
-const STEPS: StepId[] = ['intro', 'gender', 'age', 'skinType', 'outro'];
-interface Answers { gender?: string; age?: string; skinType?: string }
+type StepId =
+  | 'intro'
+  | 'gender'
+  | 'age'
+  | 'skinType'
+  | 'concerns'
+  | 'routine'
+  | 'videoIntro'
+  | 'videoBoost'
+  | 'skinNote'
+  | 'outro';
+const STEPS: StepId[] = ['intro', 'gender', 'age', 'skinType', 'concerns', 'routine', 'videoIntro', 'skinNote', 'videoBoost', 'outro'];
+interface Answers {
+  gender?: string;
+  age?: string;
+  skinType?: string;
+  concerns?: string[];
+  routine?: string;
+  skinNote?: string;
+}
 
 export default function QuestionnaireScreen() {
   const router = useRouter();
@@ -170,10 +194,12 @@ export default function QuestionnaireScreen() {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [typingDone, setTypingDone] = useState(false);
+  const [skinNote, setSkinNote] = useState('');
   const lottieRef = useRef<LottieView>(null);
 
   const step = STEPS[stepIndex];
   const hasImage = IMAGE_STEPS.includes(step);
+  const hasVideo = VIDEO_STEPS.includes(step);
 
   useEffect(() => {
     setTypingDone(false);
@@ -194,16 +220,33 @@ export default function QuestionnaireScreen() {
     setTimeout(goNext, 480);
   }, [goNext]);
 
+  const toggleConcern = useCallback((val: string) => {
+    setAnswers((prev) => {
+      const list = prev.concerns ?? [];
+      const next = list.includes(val) ? list.filter((x) => x !== val) : [...list, val];
+      return { ...prev, concerns: next };
+    });
+    haptic();
+  }, []);
+
   const Q: Record<StepId, string> = {
     intro: i18n.t('q_intro_subtitle'),  // typed as the main message for intro
     gender: i18n.t('q_gender_title'),
     age: i18n.t('q_age_title'),
     skinType: i18n.t('q_skin_title'),
+    concerns: i18n.t('q_concerns_title'),
+    routine: i18n.t('q_routine_title'),
+    videoIntro: i18n.t('q_video_intro_title'),
+    videoBoost: i18n.t('q_video_boost_title'),
+    skinNote: i18n.t('q_skin_note_title'),
     outro: i18n.t('q_outro_subtitle'),  // typed as the message for outro
   };
   const SUB: Partial<Record<StepId, string>> = {
     gender: i18n.t('q_gender_subtitle'),
     age: i18n.t('q_age_subtitle'),
+    concerns: i18n.t('q_concerns_subtitle'),
+    routine: i18n.t('q_routine_subtitle'),
+    skinNote: i18n.t('q_skin_note_subtitle'),
   };
 
   const genderOpts = [
@@ -223,6 +266,17 @@ export default function QuestionnaireScreen() {
     { id: 'normal', label: i18n.t('s_normal'), desc: i18n.t('s_normal_desc'), icon: SvgNormal },
     { id: 'combo', label: i18n.t('s_combo'), desc: i18n.t('s_combo_desc'), icon: SvgCombo },
   ];
+  const concernOpts = [
+    { id: 'acne', label: i18n.t('q_concern_breakouts'), icon: SvgOily },
+    { id: 'dryness', label: i18n.t('q_concern_dryness'), icon: SvgDry },
+    { id: 'dullness', label: i18n.t('q_concern_dullness'), icon: SvgNormal },
+    { id: 'sensitivity', label: i18n.t('q_concern_sensitivity'), icon: SvgCombo },
+  ];
+  const routineOpts = [
+    { id: 'daily', label: i18n.t('q_routine_daily'), desc: i18n.t('q_routine_daily_desc'), icon: SvgClock },
+    { id: 'few-days', label: i18n.t('q_routine_few_days'), desc: i18n.t('q_routine_few_days_desc'), icon: SvgCalendar },
+    { id: 'occasionally', label: i18n.t('q_routine_occasionally'), desc: i18n.t('q_routine_occasionally_desc'), icon: SvgHistory },
+  ];
 
   // ── Fixed panel height estimates so layout never shifts ───────────────────
   // We reserve enough space at the bottom for the content panel BEFORE it appears.
@@ -230,21 +284,31 @@ export default function QuestionnaireScreen() {
   const PANEL_PAD_BOTTOM = insets.bottom + 28;
 
   // ── IMAGE STEP LAYOUT ─────────────────────────────────────────────────────
-  if (hasImage) {
+  if (hasImage || hasVideo) {
     return (
       <View style={styles.root}>
         <StatusBar barStyle="light-content" />
 
-        {/* Full-bleed photo — absolute, never in layout flow */}
-        <Image
-          source={STEP_IMAGES[step]}
-          contentFit="cover"
-          style={StyleSheet.absoluteFillObject}
-        />
+        {hasImage ? (
+          <Image
+            source={STEP_IMAGES[step]}
+            contentFit="cover"
+            style={StyleSheet.absoluteFillObject}
+          />
+        ) : (
+          <Video
+            source={{ uri: STEP_VIDEOS[step] }}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode={ResizeMode.COVER}
+            shouldPlay
+            isLooping
+            isMuted
+          />
+        )}
 
         {/* Gradient overlay — top half clean photo, bottom half dark green */}
         <LinearGradient
-          colors={['transparent', 'transparent', 'rgba(2,26,16,0.7)', '#021a10', '#021a10']}
+          colors={hasVideo ? ['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.35)', 'rgba(2,26,16,0.75)', '#021a10', '#021a10'] : ['transparent', 'transparent', 'rgba(2,26,16,0.7)', '#021a10', '#021a10']}
           locations={[0, 0.28, 0.52, 0.68, 1]}
           style={StyleSheet.absoluteFillObject}
         />
@@ -319,9 +383,9 @@ export default function QuestionnaireScreen() {
                   ))}
                 </View>
               )}
-              {(step === 'intro' || step === 'outro') && (
+              {(step === 'intro' || step === 'videoIntro' || step === 'videoBoost' || step === 'outro') && (
                 <CtaButton
-                  label={step === 'intro' ? i18n.t('q_next') : i18n.t('q_start')}
+                  label={step === 'intro' || step === 'videoIntro' || step === 'videoBoost' ? i18n.t('q_next') : i18n.t('q_start')}
                   onPress={goNext}
                 />
               )}
@@ -400,21 +464,68 @@ export default function QuestionnaireScreen() {
           entering={FadeIn.duration(300).delay(80)}
           style={[styles.scrollWrap, { top: insets.top + 200 }]}
         >
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 32 }]}
-          >
-            {step === 'age' && ageOpts.map((o, i) => (
-              <OptionCard key={o.id} {...o} index={i}
-                isActive={answers.age === o.id}
-                onPress={() => pick('age', o.id)} />
-            ))}
-            {step === 'skinType' && skinOpts.map((o, i) => (
-              <OptionCard key={o.id} {...o} index={i}
-                isActive={answers.skinType === o.id}
-                onPress={() => pick('skinType', o.id)} />
-            ))}
-          </ScrollView>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+            >
+              {step === 'age' && ageOpts.map((o, i) => (
+                <OptionCard key={o.id} {...o} index={i}
+                  isActive={answers.age === o.id}
+                  onPress={() => pick('age', o.id)} />
+              ))}
+              {step === 'skinType' && skinOpts.map((o, i) => (
+                <OptionCard key={o.id} {...o} index={i}
+                  isActive={answers.skinType === o.id}
+                  onPress={() => pick('skinType', o.id)} />
+              ))}
+              {step === 'concerns' && (
+                <>
+                  <View style={styles.chipWrap}>
+                    {concernOpts.map((o) => {
+                      const Icon = o.icon;
+                      const active = (answers.concerns ?? []).includes(o.id);
+                      return (
+                        <Pressable
+                          key={o.id}
+                          onPress={() => toggleConcern(o.id)}
+                          style={[styles.concernChip, active && styles.concernChipActive]}
+                        >
+                          <Icon size={16} color={active ? '#fff' : 'rgba(255,255,255,0.65)'} />
+                          <Text style={[styles.concernChipText, active && styles.concernChipTextActive]}>{o.label}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <CtaButton label={i18n.t('q_next')} onPress={goNext} />
+                </>
+              )}
+              {step === 'routine' && routineOpts.map((o, i) => (
+                <OptionCard key={o.id} {...o} index={i}
+                  isActive={answers.routine === o.id}
+                  onPress={() => pick('routine', o.id)} />
+              ))}
+              {step === 'skinNote' && (
+                <View style={styles.noteCard}>
+                  <TextInput
+                    value={skinNote}
+                    onChangeText={setSkinNote}
+                    placeholder={i18n.t('q_skin_note_placeholder')}
+                    placeholderTextColor="rgba(255,255,255,0.35)"
+                    multiline
+                    style={styles.noteInput}
+                  />
+                  <CtaButton
+                    label={i18n.t('q_next')}
+                    onPress={() => {
+                      setAnswers((p) => ({ ...p, skinNote }));
+                      goNext();
+                    }}
+                  />
+                </View>
+              )}
+            </ScrollView>
+          </KeyboardAvoidingView>
         </Animated.View>
       )}
     </View>
@@ -542,6 +653,53 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     gap: 12,
+  },
+  chipWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 8,
+  },
+  concernChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  concernChipActive: {
+    backgroundColor: AppColors.primary,
+    borderColor: AppColors.primary,
+  },
+  concernChipText: {
+    fontFamily: AppTypography.semibold,
+    color: 'rgba(255,255,255,0.82)',
+    fontSize: 14,
+  },
+  concernChipTextActive: {
+    color: '#FFFFFF',
+    fontFamily: AppTypography.bold,
+  },
+  noteCard: {
+    gap: 12,
+  },
+  noteInput: {
+    minHeight: 128,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#FFFFFF',
+    textAlignVertical: 'top',
+    fontFamily: AppTypography.medium,
+    fontSize: 15,
+    lineHeight: 22,
   },
 
   // ── Option card ────────────────────────────────────────────────────────────

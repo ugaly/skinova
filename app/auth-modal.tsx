@@ -3,34 +3,38 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import CountryPicker, { CountryCode } from 'react-native-country-picker-modal';
 import Animated, { FadeIn, FadeInDown, FadeInUp, Layout, ZoomIn } from 'react-native-reanimated';
 
 import Avatar from '@/components/ui/avatar';
 import Badge from '@/components/ui/badge';
 import AnimatedDots from '@/components/ui/animated-dots';
-import Input from '@/components/ui/input';
 import OtpInput from '@/components/ui/otp-input';
 import SocialAuthButton from '@/components/ui/social-auth-button';
 import { AppColors, AppTypography, AuthAssets } from '@/constants/design';
 import { useOnboardingStore } from '@/store/useOnboardingStore';
 import i18n from '@/lib/i18n';
 
-type AuthStep = 'providers' | 'email' | 'otp';
+type AuthStep = 'providers' | 'phone' | 'otp';
 
 export default function AuthModalScreen() {
   const router = useRouter();
   const [step, setStep] = useState<AuthStep>('providers');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState<CountryCode>('TZ');
+  const [callingCode, setCallingCode] = useState('255');
+  const [countryPickerVisible, setCountryPickerVisible] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const { setCurrentStep } = useOnboardingStore();
 
   useEffect(() => {
     if (step === 'providers') setCurrentStep(0);
-    if (step === 'email') setCurrentStep(1);
+    if (step === 'phone') setCurrentStep(1);
     if (step === 'otp') setCurrentStep(2);
   }, [step, setCurrentStep]);
+
+  const formattedPhone = phone.trim() ? `+${callingCode} ${phone.trim()}` : `+${callingCode} *** *** ***`;
 
   return (
     <View style={styles.container}>
@@ -51,7 +55,7 @@ export default function AuthModalScreen() {
           <BlurView intensity={60} tint="dark" style={styles.card}>
             <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.headerRowCompact}>
               {step !== 'providers' ? (
-                <Pressable onPress={() => setStep(step === 'otp' ? 'email' : 'providers')} style={styles.backBtn}>
+                <Pressable onPress={() => setStep(step === 'otp' ? 'phone' : 'providers')} style={styles.backBtn}>
                   <ChevronLeft size={20} color={AppColors.white} />
                 </Pressable>
               ) : (
@@ -61,17 +65,17 @@ export default function AuthModalScreen() {
               )}
               <View style={styles.headerTextWrap}>
                 <Text style={styles.title}>
-                  {step === 'providers' ? i18n.t('auth_title') : step === 'email' ? i18n.t('auth_email') : i18n.t('auth_otp')}
+                  {step === 'providers' ? i18n.t('auth_title') : step === 'phone' ? i18n.t('auth_phone_title') : i18n.t('auth_otp_title')}
                 </Text>
-                <Text style={styles.subtitle}>
+                {/* <Text style={styles.subtitle}>
                   {step === 'providers'
                     ? i18n.t('auth_subtitle')
-                    : step === 'email'
-                      ? i18n.t('auth_email_subtitle')
-                      : i18n.t('auth_otp_subtitle')}
-                </Text>
+                    : step === 'phone'
+                      ? 'Enter your phone number to receive a one-time verification code.'
+                      : `We sent a 6-digit code to ${formattedPhone}`}
+                </Text> */}
               </View>
-              <Badge label={step === 'otp' ? 'STEP 3' : 'NEW'} variant="secondary" />
+              <Badge label={step === 'providers' ? i18n.t('auth_badge_signin') : step === 'phone' ? i18n.t('auth_badge_step2') : i18n.t('auth_badge_step3')} variant="secondary" />
             </Animated.View>
 
             <Animated.View entering={FadeIn.duration(500).delay(350)}>
@@ -83,47 +87,80 @@ export default function AuthModalScreen() {
                 entering={FadeInDown.springify().damping(16).delay(400)}
                 layout={Layout.springify().damping(16)}
                 style={styles.choices}>
-                <SocialAuthButton
-                  provider="google"
-                  label="Continue with Google"
-                  onPress={() => router.replace('/questionnaire' as never)}
-                />
-                {Platform.OS === 'ios' ? (
-                  <SocialAuthButton
-                    provider="apple"
-                    label="Continue with Apple"
-                    onPress={() => router.replace('/questionnaire' as never)}
-                  />
-                ) : null}
-                <SocialAuthButton provider="email" label="Continue with Email" onPress={() => setStep('email')} />
+                <View style={styles.providersHeader}>
+                  <Text style={styles.providersTitle}>{i18n.t('auth_choose_method_title')}</Text>
+                  <Text style={styles.providersSub}>{i18n.t('auth_choose_method_sub')}</Text>
+                </View>
+                <View style={styles.providersRow}>
+                  <View style={styles.providerCell}>
+                    <SocialAuthButton
+                      provider="google"
+                        label={i18n.t('auth_provider_google')}
+                      compact
+                      onPress={() => router.replace('/questionnaire' as never)}
+                    />
+                  </View>
+                  {Platform.OS === 'ios' ? (
+                    <View style={styles.providerCell}>
+                      <SocialAuthButton
+                        provider="apple"
+                        label={i18n.t('auth_provider_apple')}
+                        compact
+                        onPress={() => router.replace('/questionnaire' as never)}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+                <SocialAuthButton provider="email" label={i18n.t('auth_provider_phone')} onPress={() => setStep('phone')} />
+                <Text style={styles.providersFooter}>{i18n.t('auth_terms_footer')}</Text>
               </Animated.View>
             ) : null}
 
-            {step === 'email' ? (
+            {step === 'phone' ? (
               <Animated.View
                 entering={FadeInDown.springify().damping(16)}
                 layout={Layout.springify().damping(16)}
                 style={styles.focusForm}>
-                <Input
-                  label="Email"
-                  labelStyle={{ color: '#FFF' }}
-                  placeholder="you@example.com"
-                  type="email"
-                  value={email}
-                  onChangeText={setEmail}
-                  clearable
-                />
-                <Input
-                  label="Password"
-                  labelStyle={{ color: '#FFF' }}
-                  placeholder="••••••••"
-                  type="password"
-                  value={password}
-                  onChangeText={setPassword}
-                />
+                <Text style={styles.phoneLabel}>{i18n.t('auth_phone_label')}</Text>
+                <View style={styles.phoneField}>
+                  <Pressable
+                    style={styles.countryPickerWrap}
+                    onPress={() => setCountryPickerVisible(true)}
+                    hitSlop={8}
+                  >
+                    <CountryPicker
+                      countryCode={countryCode}
+                      visible={countryPickerVisible}
+                      withFilter
+                      withFlag
+                      withCallingCode
+                      withEmoji
+                      withAlphaFilter
+                      onClose={() => setCountryPickerVisible(false)}
+                      onSelect={(country) => {
+                        setCountryCode(country.cca2);
+                        setCallingCode(country.callingCode?.[0] || '255');
+                        setCountryPickerVisible(false);
+                      }}
+                    />
+                    <Text style={styles.callingCodeText}>+{callingCode}</Text>
+                  </Pressable>
+                  <TextInput
+                    placeholder={i18n.t('auth_phone_placeholder')}
+                    placeholderTextColor="rgba(255,255,255,0.45)"
+                    keyboardType="phone-pad"
+                    value={phone}
+                    onChangeText={setPhone}
+                    style={styles.phoneInputText}
+                  />
+                </View>
 
-                <Pressable style={styles.primaryAction} onPress={() => setStep('otp')}>
-                  <Text style={styles.primaryActionText}>Send Verification Code</Text>
+                <Pressable
+                  style={[styles.primaryAction, phone.trim().length < 8 && styles.primaryActionDisabled]}
+                  onPress={() => setStep('otp')}
+                  disabled={phone.trim().length < 8}
+                >
+                  <Text style={styles.primaryActionText}>{i18n.t('auth_send_otp')}</Text>
                 </Pressable>
               </Animated.View>
             ) : null}
@@ -138,10 +175,10 @@ export default function AuthModalScreen() {
                   style={[styles.primaryAction, otpCode.length < 6 && styles.primaryActionDisabled]}
                   onPress={() => router.replace('/questionnaire' as never)}
                   disabled={otpCode.length < 6}>
-                  <Text style={styles.primaryActionText}>Verify & Continue</Text>
+                  <Text style={styles.primaryActionText}>{i18n.t('auth_verify_continue')}</Text>
                 </Pressable>
                 <Pressable onPress={() => setOtpCode('')} style={styles.inlineActionWrap}>
-                  <Text style={styles.inlineAction}>Resend code</Text>
+                  <Text style={styles.inlineAction}>{i18n.t('auth_resend_prefix')} {formattedPhone}</Text>
                 </Pressable>
               </Animated.View>
             ) : null}
@@ -228,12 +265,82 @@ const styles = StyleSheet.create({
     marginTop: 20,
     gap: 12,
   },
+  providersHeader: {
+    marginBottom: 2,
+    gap: 4,
+  },
+  providersTitle: {
+    color: '#FFFFFF',
+    fontFamily: AppTypography.bold,
+    fontSize: 15,
+    letterSpacing: 0.2,
+  },
+  providersSub: {
+    color: 'rgba(255,255,255,0.62)',
+    fontFamily: AppTypography.regular,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  providersRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  providerCell: {
+    flex: 1,
+  },
+  providersFooter: {
+    marginTop: 4,
+    color: 'rgba(255,255,255,0.48)',
+    fontFamily: AppTypography.regular,
+    fontSize: 11.5,
+    lineHeight: 16,
+    textAlign: 'center',
+  },
   focusForm: {
     marginTop: 20,
     gap: 12,
     alignSelf: 'center',
     width: '100%',
     maxWidth: 360,
+  },
+  phoneLabel: {
+    color: '#FFFFFF',
+    fontFamily: AppTypography.semibold,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  phoneField: {
+    minHeight: 56,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  countryPickerWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingRight: 10,
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(255,255,255,0.18)',
+  },
+  callingCodeText: {
+    color: '#FFFFFF',
+    fontFamily: AppTypography.bold,
+    fontSize: 14,
+    letterSpacing: 0.2,
+  },
+  phoneInputText: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontFamily: AppTypography.medium,
+    fontSize: 15,
+    lineHeight: 20,
+    paddingVertical: 10,
   },
   primaryAction: {
     marginTop: 12,

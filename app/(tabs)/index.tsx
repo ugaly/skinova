@@ -79,7 +79,7 @@ export default function TodayTab() {
       {/* ── Header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <View>
-          <Text style={styles.greeting}>Good morning ✨</Text>
+          <Text style={styles.greeting}>Good evening ✨</Text>
           <Text style={styles.heading}>Today's Routine</Text>
         </View>
         <TouchableOpacity style={styles.scoreBadge} activeOpacity={0.8} onPress={() => router.push('/(tabs)/scan' as any)}>
@@ -227,6 +227,38 @@ export default function TodayTab() {
             <View style={styles.recBannerArrow}>
               <ChevronRight size={18} color="#059669" strokeWidth={3} />
             </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── My Journey Menu ── */}
+        <View style={{ marginTop: 28, marginBottom: 40, paddingHorizontal: 24 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#F0FDF4',
+              borderRadius: 22,
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 20,
+              shadowColor: '#10B981',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.10,
+              shadowRadius: 12,
+              elevation: 3,
+            }}
+            activeOpacity={0.92}
+            onPress={() => router.push('/my-journey' as any)}
+          >
+            <View style={{
+              width: 48, height: 48, borderRadius: 16, backgroundColor: '#D1FAE5',
+              alignItems: 'center', justifyContent: 'center', marginRight: 18
+            }}>
+              <Smile size={26} color="#10B981" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: AppTypography.bold, fontSize: 17, color: '#059669', marginBottom: 2 }}>My Journey</Text>
+              <Text style={{ fontFamily: AppTypography.medium, fontSize: 13, color: '#4B5563' }}>Track your skincare progress, achievements, and milestones.</Text>
+            </View>
+            <ChevronRight size={22} color="#059669" />
           </TouchableOpacity>
         </View>
 
