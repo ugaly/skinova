@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { CalendarRange, CheckCircle2, Droplets, Moon, Sparkles, Sun, Smile, Frown, Flame, AlertCircle, Sparkle, ArrowRight, Package, ChevronRight } from 'lucide-react-native';
+import { CalendarRange, CheckCircle2, Droplets, Moon, Sparkles, Sun, Smile, Flame, AlertCircle, Sparkle, Package, ChevronRight, MessageCircle, Stethoscope } from 'lucide-react-native';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RFValue } from "react-native-responsive-fontsize";
@@ -259,6 +259,46 @@ export default function TodayTab() {
               <Text style={{ fontFamily: AppTypography.medium, fontSize: 13, color: '#4B5563' }}>Track your skincare progress, achievements, and milestones.</Text>
             </View>
             <ChevronRight size={22} color="#059669" />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Feedback Menu ── */}
+        <View style={styles.feedbackWrapper}>
+          <TouchableOpacity
+            style={styles.feedbackCard}
+            activeOpacity={0.92}
+            onPress={() => router.push('/feedback' as any)}
+          >
+            <View style={styles.feedbackIconShell}>
+              <View style={styles.feedbackIconShellInner}>
+                <MessageCircle size={24} color="#059669" />
+              </View>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.feedbackTitle}>Share Feedback</Text>
+              <Text style={styles.feedbackDesc}>Rate your experience and help us improve your skincare journey.</Text>
+            </View>
+            <ChevronRight size={22} color="#059669" />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Meet Our Dermatologists ── */}
+        <View style={styles.feedbackWrapper}>
+          <TouchableOpacity
+            style={styles.dermCard}
+            activeOpacity={0.92}
+            onPress={() => router.push('/dermatologists' as any)}
+          >
+            <View style={styles.dermIconShell}>
+              <View style={styles.feedbackIconShellInner}>
+                <Stethoscope size={24} color="#047857" />
+              </View>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.feedbackTitle}>Meet Our Dermatologists</Text>
+              <Text style={styles.feedbackDesc}>Browse top specialists, check availability, and book your session.</Text>
+            </View>
+            <ChevronRight size={22} color="#047857" />
           </TouchableOpacity>
         </View>
 
@@ -603,5 +643,91 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 4,
+  },
+  feedbackWrapper: {
+    marginTop: 8,
+    marginBottom: 20,
+    paddingHorizontal: 24,
+  },
+  feedbackCard: {
+    backgroundColor: '#ECFDF5',
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 18,
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(5,150,105,0.12)',
+  },
+  dermCard: {
+    backgroundColor: '#F0FDF4',
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 18,
+    shadowColor: '#047857',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(4,120,87,0.14)',
+  },
+  feedbackIconShell: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#C7F7DD',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: -4, height: -4 },
+    shadowOpacity: 0.9,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  dermIconShell: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#BBF7D0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: -4, height: -4 },
+    shadowOpacity: 0.9,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  feedbackIconShellInner: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F4FFF9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#A6EEC8',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 6,
+  },
+  feedbackTitle: {
+    fontFamily: AppTypography.bold,
+    fontSize: 17,
+    color: '#0B3A29',
+    marginBottom: 3,
+  },
+  feedbackDesc: {
+    fontFamily: AppTypography.medium,
+    fontSize: 12.5,
+    color: '#4F7667',
+    lineHeight: 17,
+    paddingRight: 8,
   },
 });

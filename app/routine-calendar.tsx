@@ -147,467 +147,355 @@
 
 
 
-import React, { useState, useMemo } from 'react';
+import { useRouter } from 'expo-router';
+import { Calendar, DateData } from 'react-native-calendars';
+import { CalendarCheck2, CalendarDays, ChevronLeft, Clock3, Flag, Plus, Target } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Modal,
   ScrollView,
-  Dimensions,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Calendar } from 'react-native-calendars';
-import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { AppTypography } from '@/constants/design';
-import { RFValue } from 'react-native-responsive-fontsize';
-import { X, Calendar as CalendarIcon, Clock, Tag } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Types
-interface CalendarEvent {
+type EventType = 'to-do' | 'event' | 'reminder' | 'milestone';
+type EventItem = {
   id: string;
-  name: string;
-  type: 'routine' | 'reminder' | 'event';
-  time?: string;
-  description?: string;
-}
-
-interface MarkedDateProps {
-  marked: boolean;
-  dotColor: string;
-  selected?: boolean;
-  selectedColor?: string;
-}
-
-// Sample data structure
-const SAMPLE_EVENTS: Record<string, CalendarEvent[]> = {
-  '2026-04-27': [
-    { id: '1', name: 'Morning Skincare Routine', type: 'routine', time: '08:00 AM', description: 'Cleanse → Tone → Moisturize → SPF' },
-    { id: '2', name: 'Evening Routine', type: 'routine', time: '09:00 PM', description: 'Double Cleanse → Serum → Night Cream' },
-  ],
-  '2026-04-28': [
-    { id: '3', name: 'Vitamin C Serum Restock', type: 'reminder', time: '02:00 PM', description: 'Running low on Vitamin C serum' },
-  ],
-  '2026-04-29': [
-    { id: '4', name: 'Weekly Skin Analysis', type: 'event', time: '10:30 AM', description: 'Check progress and adjust routine' },
-  ],
-  '2026-05-01': [
-    { id: '5', name: 'Exfoliation Day', type: 'routine', time: '08:00 PM', description: 'Chemical exfoliant application' },
-  ],
+  title: string;
+  start: string;
+  end: string;
+  type: EventType;
 };
 
-const EVENT_COLORS = {
-  routine: '#22C55E',
-  reminder: '#F59E0B',
-  event: '#3B82F6',
+const TYPE_COLOR: Record<EventType, string> = {
+  'to-do': '#38BDF8',
+  event: '#10B981',
+  reminder: '#14B8A6',
+  milestone: '#059669',
 };
 
-const EVENT_ICONS = {
-  routine: '🪞',
-  reminder: '🛍️',
-  event: '📊',
+const today = new Date();
+const todayKey = today.toISOString().slice(0, 10);
+const tomorrow = new Date(today);
+tomorrow.setDate(today.getDate() + 1);
+const tomorrowKey = tomorrow.toISOString().slice(0, 10);
+
+const INITIAL_EVENTS: Record<string, EventItem[]> = {
+  [todayKey]: [
+    { id: 't1', title: 'Website have to audit as soon as possible', start: '11:20 AM', end: '12:20 PM', type: 'to-do' },
+    { id: 't2', title: 'Meeting with Client', start: '12:30 PM', end: '1:00 PM', type: 'event' },
+    { id: 't3', title: 'Hydration Reminder', start: '2:00 PM', end: '2:30 PM', type: 'reminder' },
+    { id: 't4', title: 'Design milestone', start: '4:20 PM', end: '5:00 PM', type: 'milestone' },
+  ],
+  [tomorrowKey]: [
+    { id: 'n1', title: 'Morning barrier routine', start: '8:00 AM', end: '8:25 AM', type: 'to-do' },
+    { id: 'n2', title: 'Dermatology follow-up call', start: '3:00 PM', end: '3:30 PM', type: 'event' },
+  ],
 };
 
 export default function RoutineCalendarScreen() {
-  const navigation = useNavigation();
-  const [selectedDate, setSelectedDate] = useState('2026-04-27');
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState(todayKey);
+  const [eventsByDate, setEventsByDate] = useState<Record<string, EventItem[]>>(INITIAL_EVENTS);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventStart, setEventStart] = useState('09:00 AM');
+  const [eventEnd, setEventEnd] = useState('09:30 AM');
+  const [eventType, setEventType] = useState<EventType>('to-do');
 
-  // Get events for selected date
-  const selectedDateEvents = useMemo(
-    () => SAMPLE_EVENTS[selectedDate] || [],
-    [selectedDate]
-  );
+  const selectedEvents = eventsByDate[selectedDate] ?? [];
 
-  // Format date for display
-  const formatDisplayDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  // Prepare marked dates for calendar
   const markedDates = useMemo(() => {
-    const marked: Record<string, MarkedDateProps> = {};
-    
-    // Mark dates with events
-    Object.keys(SAMPLE_EVENTS).forEach(date => {
-      marked[date] = {
+    const map: Record<string, any> = {};
+    Object.keys(eventsByDate).forEach((date) => {
+      const firstType = eventsByDate[date]?.[0]?.type ?? 'event';
+      map[date] = {
         marked: true,
-        dotColor: EVENT_COLORS[SAMPLE_EVENTS[date][0]?.type] || '#22C55E',
+        dotColor: TYPE_COLOR[firstType],
       };
     });
-    
-    // Mark selected date
-    marked[selectedDate] = {
-      ...marked[selectedDate],
+    map[selectedDate] = {
+      ...map[selectedDate],
       selected: true,
-      selectedColor: '#22C55E',
+      selectedColor: '#10B981',
+      selectedTextColor: '#FFFFFF',
     };
-    
-    return marked;
-  }, [selectedDate]);
+    return map;
+  }, [eventsByDate, selectedDate]);
 
-  const handleDayPress = (day: { dateString: string }) => {
+  const onDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
-    setSelectedEvent(null);
   };
 
-  const handleEventPress = (event: CalendarEvent) => {
-    setSelectedEvent(event);
+  const addEvent = () => {
+    const title = eventTitle.trim();
+    if (!title) return;
+    const next: EventItem = {
+      id: `${Date.now()}`,
+      title,
+      start: eventStart.trim() || '09:00 AM',
+      end: eventEnd.trim() || '09:30 AM',
+      type: eventType,
+    };
+    setEventsByDate((prev) => ({
+      ...prev,
+      [selectedDate]: [...(prev[selectedDate] ?? []), next],
+    }));
+    setEventTitle('');
+    setEventStart('09:00 AM');
+    setEventEnd('09:30 AM');
+    setEventType('to-do');
+    setShowAddModal(false);
   };
 
-  const getEventTypeIcon = (type: string) => {
-    switch (type) {
-      case 'routine':
-        return <View style={[styles.eventTypeIcon, { backgroundColor: '#22C55E15' }]}>
-          <Text style={styles.eventIconText}>🪞</Text>
-        </View>;
-      case 'reminder':
-        return <View style={[styles.eventTypeIcon, { backgroundColor: '#F59E0B15' }]}>
-          <Text style={styles.eventIconText}>🛍️</Text>
-        </View>;
-      case 'event':
-        return <View style={[styles.eventTypeIcon, { backgroundColor: '#3B82F615' }]}>
-          <Text style={styles.eventIconText}>📊</Text>
-        </View>;
-      default:
-        return null;
-    }
-  };
+  const headerDate = new Date(selectedDate);
+  const monthTitle = headerDate.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: '2-digit',
+    weekday: 'long',
+  });
 
   return (
-    
-      <LinearGradient
-        colors={['#FFFFFF', '#F9FAFB']}
-        style={styles.container}
-      >
-        <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <CalendarIcon size={24} color="#22C55E" strokeWidth={1.5} />
-          </View>
-          <Text style={styles.headerTitle}>Skincare Calendar</Text>
-          <TouchableOpacity 
-            style={styles.closeBtn} 
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}
-          >
-            <X size={24} color="#111827" strokeWidth={1.5} />
-          </TouchableOpacity>
-        </View>
+    <View style={styles.screen}>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <ChevronLeft size={20} color="#065F46" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Skin Calendar</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
-        {/* Calendar */}
-        <View style={styles.calendarContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 10, paddingBottom: insets.bottom + 30 }}
+      >
+        <View style={styles.calendarCard}>
+          <View style={styles.calendarTop}>
+            <Text style={styles.calendarDateLabel}>{monthTitle}</Text>
+            <View style={styles.calendarTopIcon}>
+              <CalendarDays size={16} color="#6B7280" />
+            </View>
+          </View>
           <Calendar
-            style={styles.calendar}
-            theme={{
-              backgroundColor: 'transparent',
-              calendarBackground: 'transparent',
-              textSectionTitleColor: '#6B7280',
-              selectedDayBackgroundColor: '#22C55E',
-              selectedDayTextColor: '#FFFFFF',
-              todayTextColor: '#22C55E',
-              dayTextColor: '#111827',
-              textDisabledColor: '#D1D5DB',
-              arrowColor: '#22C55E',
-              monthTextColor: '#111827',
-              textDayFontFamily: AppTypography.medium,
-              textMonthFontFamily: AppTypography.bold,
-              textDayHeaderFontFamily: AppTypography.semibold,
-              textDayFontSize: RFValue(14),
-              textMonthFontSize: RFValue(16),
-              textDayHeaderFontSize: RFValue(12),
-            }}
-            onDayPress={handleDayPress}
+            current={selectedDate}
             markedDates={markedDates}
-            markingType={'simple'}
-            enableSwipeMonths={true}
-            firstDay={1}
+            onDayPress={onDayPress}
+            enableSwipeMonths
+            theme={{
+              textMonthFontFamily: AppTypography.bold,
+              textDayFontFamily: AppTypography.semibold,
+              textDayHeaderFontFamily: AppTypography.medium,
+              monthTextColor: '#111827',
+              dayTextColor: '#111827',
+              arrowColor: '#4B5563',
+              textDisabledColor: '#D1D5DB',
+              todayTextColor: '#10B981',
+              calendarBackground: '#FFFFFF',
+            }}
+            style={styles.calendar}
           />
         </View>
 
-        {/* Events Section */}
-        <View style={styles.eventsSection}>
-          <View style={styles.eventsHeader}>
-            <Text style={styles.eventsTitle}>
-              {selectedDateEvents.length > 0 ? 'Today\'s Schedule' : 'No Events Planned'}
-            </Text>
-            <Text style={styles.eventsDate}>
-              {formatDisplayDate(selectedDate)}
-            </Text>
-          </View>
-
-          <ScrollView 
-            style={styles.eventsList}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.eventsListContent}
-          >
-            {selectedDateEvents.length > 0 ? (
-              selectedDateEvents.map((event) => (
-                <TouchableOpacity
-                  key={event.id}
-                  style={[
-                    styles.eventCard,
-                    selectedEvent?.id === event.id && styles.eventCardSelected,
-                  ]}
-                  onPress={() => handleEventPress(event)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.eventCardContent}>
-                    {getEventTypeIcon(event.type)}
-                    
-                    <View style={styles.eventDetails}>
-                      <Text style={styles.eventName}>{event.name}</Text>
-                      
-                      {event.time && (
-                        <View style={styles.eventMetaRow}>
-                          <Clock size={12} color="#6B7280" strokeWidth={1.5} />
-                          <Text style={styles.eventTime}>{event.time}</Text>
-                        </View>
-                      )}
-                      
-                      {event.description && selectedEvent?.id === event.id && (
-                        <Text style={styles.eventDescription}>{event.description}</Text>
-                      )}
-                    </View>
-                    
-                    <View style={[styles.eventBadge, { backgroundColor: EVENT_COLORS[event.type] + '15' }]}>
-                      <Text style={[styles.eventBadgeText, { color: EVENT_COLORS[event.type] }]}>
-                        {event.type.toUpperCase()}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyStateIcon}>📅</Text>
-                <Text style={styles.emptyStateTitle}>No events scheduled</Text>
-                <Text style={styles.emptyStateText}>
-                  Tap the + button to add routines, reminders, or events to your calendar
-                </Text>
-              </View>
-            )}
-          </ScrollView>
+        <View style={styles.tasksHeader}>
+          <Text style={styles.tasksTitle}>Today&apos;s Task</Text>
+          <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddModal(true)}>
+            <Plus size={18} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
 
-        {/* Add Event Button - Uncomment when implementing add functionality */}
-        {/* <TouchableOpacity style={styles.fab} onPress={() => {}}>
-          <LinearGradient
-            colors={['#22C55E', '#16A34A']}
-            style={styles.fabGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Text style={styles.fabIcon}>+</Text>
-          </LinearGradient>
-        </TouchableOpacity> */}
-        </SafeAreaView>
-      </LinearGradient>
+        <View style={styles.taskList}>
+          {selectedEvents.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>No tasks yet. Tap + to add one.</Text>
+            </View>
+          ) : (
+            selectedEvents.map((item) => (
+              <View key={item.id} style={styles.taskItem}>
+                <View style={[styles.taskTypeIconWrap, { backgroundColor: `${TYPE_COLOR[item.type]}18` }]}>
+                  {item.type === 'to-do' && <Target size={14} color={TYPE_COLOR[item.type]} />}
+                  {item.type === 'event' && <CalendarCheck2 size={14} color={TYPE_COLOR[item.type]} />}
+                  {item.type === 'reminder' && <Clock3 size={14} color={TYPE_COLOR[item.type]} />}
+                  {item.type === 'milestone' && <Flag size={14} color={TYPE_COLOR[item.type]} />}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.taskType}>{item.type.replace('-', ' ')}</Text>
+                  <Text style={styles.taskTitle}>{item.title}</Text>
+                  <View style={styles.taskTimeRow}>
+                    <Clock3 size={12} color="#6B7280" />
+                    <Text style={styles.taskTime}>{item.start} - {item.end}</Text>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+
+      <Modal visible={showAddModal} transparent animationType="fade" onRequestClose={() => setShowAddModal(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Add Event</Text>
+            <TextInput
+              value={eventTitle}
+              onChangeText={setEventTitle}
+              placeholder="Event title"
+              placeholderTextColor="#9CA3AF"
+              style={styles.input}
+            />
+            <View style={styles.timeRow}>
+              <TextInput value={eventStart} onChangeText={setEventStart} placeholder="Start" style={[styles.input, styles.timeInput]} />
+              <TextInput value={eventEnd} onChangeText={setEventEnd} placeholder="End" style={[styles.input, styles.timeInput]} />
+            </View>
+            <View style={styles.typeRow}>
+              {(['to-do', 'event', 'reminder', 'milestone'] as EventType[]).map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[styles.typeChip, eventType === type && { backgroundColor: TYPE_COLOR[type] }]}
+                  onPress={() => setEventType(type)}
+                >
+                  <Text style={[styles.typeChipText, eventType === type && { color: '#fff' }]}>{type}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAddModal(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={addEvent}>
+                <Text style={styles.saveText}>Save Event</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  container: {
-    flex: 1,
-  },
+  screen: { flex: 1, backgroundColor: '#F3FCF8' },
   header: {
+    paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    marginBottom: 2,
+    backgroundColor: '#F3FCF8',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: 'rgba(16,185,129,0.12)',
   },
-  headerLeft: {
-    width: 40,
-  },
-  headerTitle: {
-    fontFamily: AppTypography.bold,
-    fontSize: RFValue(20),
-    color: '#111827',
-    textAlign: 'center',
-  },
-  closeBtn: {
+  backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#E8FAF1',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3F4F6',
   },
-  calendarContainer: {
-    backgroundColor: '#FFFFFF',
+  headerTitle: { fontFamily: AppTypography.bold, fontSize: 19, color: '#0E3528' },
+  calendarCard: {
     marginHorizontal: 16,
-    marginTop: 16,
     borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  calendar: {
-    paddingBottom: 8,
-  },
-  eventsSection: {
-    flex: 1,
-    marginTop: 20,
-  },
-  eventsHeader: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  eventsTitle: {
-    fontFamily: AppTypography.bold,
-    fontSize: RFValue(18),
-    color: '#111827',
-    marginBottom: 4,
-  },
-  eventsDate: {
-    fontFamily: AppTypography.medium,
-    fontSize: RFValue(13),
-    color: '#6B7280',
-  },
-  eventsList: {
-    flex: 1,
-  },
-  eventsListContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-  },
-  eventCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: 'rgba(16,185,129,0.14)',
+    padding: 12,
+    marginBottom: 18,
   },
-  eventCardSelected: {
-    borderColor: '#22C55E',
-    borderWidth: 2,
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  eventCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  eventTypeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  calendarTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  calendarDateLabel: { fontFamily: AppTypography.bold, color: '#111827', fontSize: 17 },
+  calendarTopIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
   },
-  eventIconText: {
-    fontSize: RFValue(22),
+  calendar: { borderRadius: 14 },
+  tasksHeader: {
+    marginHorizontal: 18,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  eventDetails: {
+  tasksTitle: { fontFamily: AppTypography.bold, fontSize: 22, color: '#0D2B20' },
+  addBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#10B981',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  taskList: { marginHorizontal: 18, gap: 10 },
+  taskItem: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(16,185,129,0.14)',
+    paddingTop: 14,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  taskTypeIconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  taskType: { fontFamily: AppTypography.medium, fontSize: 12, color: '#9CA3AF', textTransform: 'capitalize' },
+  taskTitle: { fontFamily: AppTypography.bold, fontSize: 15, color: '#102A21', marginTop: 2, marginBottom: 5, lineHeight: 21 },
+  taskTimeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  taskTime: { fontFamily: AppTypography.medium, fontSize: 11.5, color: '#6B7280' },
+  emptyCard: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(16,185,129,0.14)',
+    paddingTop: 14,
+    paddingBottom: 6,
+  },
+  emptyText: { fontFamily: AppTypography.medium, color: '#94A3B8', fontSize: 13 },
+  modalBackdrop: {
     flex: 1,
-  },
-  eventName: {
-    fontFamily: AppTypography.bold,
-    fontSize: RFValue(15),
-    color: '#111827',
-    marginBottom: 6,
-  },
-  eventMetaRow: {
-    flexDirection: 'row',
+    backgroundColor: 'rgba(15,23,42,0.35)',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'center',
+    padding: 20,
   },
-  eventTime: {
-    fontFamily: AppTypography.medium,
-    fontSize: RFValue(12),
-    color: '#6B7280',
-    marginLeft: 4,
-  },
-  eventDescription: {
-    fontFamily: AppTypography.regular,
-    fontSize: RFValue(12),
-    color: '#6B7280',
-    marginTop: 8,
-    lineHeight: 18,
-  },
-  eventBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  modalCard: { width: '100%', borderRadius: 18, backgroundColor: '#fff', padding: 14, borderWidth: 1, borderColor: 'rgba(16,185,129,0.14)' },
+  modalTitle: { fontFamily: AppTypography.bold, fontSize: 18, color: '#0E3528', marginBottom: 10 },
+  input: {
+    borderWidth: 1,
+    borderColor: 'rgba(16,185,129,0.16)',
     borderRadius: 12,
-  },
-  eventBadgeText: {
-    fontFamily: AppTypography.semibold,
-    fontSize: RFValue(10),
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 48,
-  },
-  emptyStateIcon: {
-    fontSize: RFValue(48),
-    marginBottom: 16,
-  },
-  emptyStateTitle: {
-    fontFamily: AppTypography.semibold,
-    fontSize: RFValue(16),
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontFamily: AppTypography.medium,
     color: '#111827',
-    marginBottom: 8,
+    fontSize: 13,
+    marginBottom: 10,
   },
-  emptyStateText: {
-    fontFamily: AppTypography.regular,
-    fontSize: RFValue(13),
-    color: '#6B7280',
-    textAlign: 'center',
-    paddingHorizontal: 32,
-    lineHeight: 20,
+  timeRow: { flexDirection: 'row', gap: 8 },
+  timeInput: { flex: 1 },
+  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  typeChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: '#ECFDF5',
   },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  fabGradient: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fabIcon: {
-    fontSize: RFValue(28),
-    color: '#FFFFFF',
-    fontWeight: '300',
-  },
+  typeChipText: { fontFamily: AppTypography.semibold, color: '#334155', fontSize: 12, textTransform: 'capitalize' },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
+  cancelBtn: { paddingHorizontal: 12, paddingVertical: 9 },
+  cancelText: { fontFamily: AppTypography.semibold, color: '#6B7280', fontSize: 13 },
+  saveBtn: { backgroundColor: '#10B981', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9 },
+  saveText: { fontFamily: AppTypography.bold, color: '#fff', fontSize: 13 },
 });

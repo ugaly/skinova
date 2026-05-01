@@ -286,7 +286,9 @@ const styles = StyleSheet.create({
     },
     circleBtn: {
         width: 40, height: 40, borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.9)',
+        backgroundColor: 'rgba(255,255,255,0.98)',
+        borderWidth: 1,
+        borderColor: 'rgba(15,23,42,0.08)',
         justifyContent: 'center', alignItems: 'center',
         shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5, elevation: 2,
     },
@@ -298,6 +300,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: 30,
         minHeight: hp('70%'),
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
     },
     pillBox: {
         alignSelf: 'flex-start',
@@ -313,19 +319,20 @@ const styles = StyleSheet.create({
     },
     title: {
         fontFamily: AppTypography.bold,
-        fontSize: RFValue(26),
+        fontSize: RFValue(27),
         color: '#0A2218',
         marginBottom: 8,
+        lineHeight: 34,
     },
     subtitle: {
         fontFamily: AppTypography.medium,
         fontSize: RFValue(15),
-        color: '#6B9E88',
+        color: '#48685C',
         lineHeight: 22,
         marginBottom: 24,
     },
     divider: {
-        height: 1, backgroundColor: '#F3F4F6', marginBottom: 24,
+        height: 1, backgroundColor: '#E5E7EB', marginBottom: 24,
     },
     subProductsSection: {
         marginBottom: 30,
@@ -377,7 +384,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontFamily: AppTypography.bold,
         fontSize: RFValue(18),
-        color: '#0A2218',
+        color: '#0B2A1F',
         marginBottom: 16,
     },
     detailCard: {
@@ -398,13 +405,13 @@ const styles = StyleSheet.create({
     detailDesc: {
         fontFamily: AppTypography.medium,
         fontSize: RFValue(13),
-        color: '#7BA898',
+        color: '#55796C',
         lineHeight: 18,
     },
     longDesc: {
         fontFamily: AppTypography.medium,
         fontSize: RFValue(14),
-        color: '#6B9E88',
+        color: '#48685C',
         lineHeight: 22,
         marginBottom: 30,
     },
@@ -418,7 +425,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: '#F8FAFC',
+        borderWidth: 1,
+        borderColor: 'rgba(15,23,42,0.08)',
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 14,

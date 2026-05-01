@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 
 import { AppTypography } from '@/constants/design';
@@ -31,6 +31,9 @@ interface Message {
 export default function AiChatScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const params = useLocalSearchParams<{ title?: string; status?: string }>();
+  const chatTitle = params.title || 'Skinova AI';
+  const chatStatus = params.status || 'Online & Analyzing';
   const [messages, setMessages] = useState<Message[]>([
     { 
       id: 1, 
@@ -79,8 +82,8 @@ export default function AiChatScreen() {
             <ArrowLeft size={24} color="#fff" />
           </TouchableOpacity>
           <View style={styles.aiInfo}>
-             <Text style={styles.aiTitle}>Skinova AI</Text>
-             <Text style={styles.aiStatus}>Online & Analyzing</Text>
+            <Text style={styles.aiTitle}>{chatTitle}</Text>
+             <Text style={styles.aiStatus}>{chatStatus}</Text>
           </View>
           <View style={styles.lottieWrap}>
             <LottieView

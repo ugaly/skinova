@@ -35,6 +35,7 @@ export default function RootLayout() {
       <ModalProvider>
         <PermissionsProvider>
           <Stack screenOptions={{ headerShown: false }}>
+          {/* <Stack.Screen name="index" options={{ headerShown: false }} /> */}
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
               name="face-scan"
@@ -89,6 +90,86 @@ export default function RootLayout() {
               name="my-shelf"
               options={{
                 headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="feedback"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="dermatologists"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="dermatologist/[id]"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="appointment-schedule"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="appointment-history"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="dermatology-chat"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="routine-calendar"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="chat-list"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="search"
+              options={{
+                headerShown: false,
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="product-scan"
+              options={{
+                headerShown: false,
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
               }}
             />
           </Stack>

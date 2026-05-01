@@ -1445,10 +1445,14 @@ export default function ProductsTab() {
         </View>
 
         {/* Scan Bar */}
-        <TouchableOpacity style={styles.scanBar} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.scanBar}
+          activeOpacity={0.8}
+          onPress={() => router.push('/product-scan' as any)}
+        >
           <View style={styles.scanLeft}>
             <Scan size={20} color="#0A2218" />
-            <Text style={styles.scanText}>Scan your face with AI</Text>
+            <Text style={styles.scanText}>Scan your product with AI</Text>
           </View>
           <ArrowRight size={20} color="#0A2218" opacity={0.5} />
         </TouchableOpacity>
@@ -1684,7 +1688,7 @@ const styles = StyleSheet.create({
   },
   scanText: {
     fontFamily: AppTypography.semibold,
-    fontSize: RFValue(14),
+    fontSize: RFValue(12),
     color: '#0A2218',
   },
   categoryContainer: {
